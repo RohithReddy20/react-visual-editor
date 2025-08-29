@@ -411,6 +411,48 @@ const updateJSXElementStyle = (
   }
 };
 
+// Helper function to merge style strings intelligently (for fallback approach)
+const mergeStyleStringsInAST = (
+  existingStylesString: string,
+  newStyleObject: StyleProperties
+): string => {
+  // Parse existing styles from string format "prop1: 'value1', prop2: 'value2'"
+  const existingStyles: StyleProperties = {};
+
+  // Clean up the string and split by commas
+  const styleEntries = existingStylesString
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  // Parse each style entry
+  styleEntries.forEach((entry) => {
+    const colonIndex = entry.indexOf(":");
+    if (colonIndex > 0) {
+      const key = entry.substring(0, colonIndex).trim();
+      let value = entry.substring(colonIndex + 1).trim();
+
+      // Remove quotes if present
+      if (
+        (value.startsWith("'") && value.endsWith("'")) ||
+        (value.startsWith('"') && value.endsWith('"'))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      existingStyles[key] = value;
+    }
+  });
+
+  // Merge with new styles (new styles take precedence)
+  const mergedStyles = { ...existingStyles, ...newStyleObject };
+
+  // Convert back to string format
+  return Object.entries(mergedStyles)
+    .map(([key, value]) => `${key}: '${value}'`)
+    .join(", ");
+};
+
 // Fallback: Simple string-based style injection for when AST fails
 export const injectStyleFallback = (
   code: string,
@@ -455,11 +497,15 @@ export const injectStyleFallback = (
       const styleMatch = attributes.match(styleAttrRegex);
 
       if (styleMatch) {
-        // Update existing style
+        // Update existing style - merge intelligently
         const existingStyles = styleMatch[1];
+        const mergedStyles = mergeStyleStringsInAST(
+          existingStyles,
+          styleObject
+        );
         const newAttributes = attributes.replace(
           styleAttrRegex,
-          `style={{${existingStyles}, ${styleString}}}`
+          `style={{${mergedStyles}}}`
         );
         return `<${targetElement.tag}${newAttributes}>`;
       } else {

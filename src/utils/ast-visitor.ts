@@ -1,5 +1,47 @@
 import { ElementProperties } from "../components/editor/properties-panel";
 
+// Helper function to parse and merge style strings intelligently
+const mergeStyleStrings = (
+  existingStylesString: string,
+  newStyleObject: Record<string, string>
+): string => {
+  // Parse existing styles from string format "prop1: 'value1', prop2: 'value2'"
+  const existingStyles: Record<string, string> = {};
+
+  // Clean up the string and split by commas
+  const styleEntries = existingStylesString
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  // Parse each style entry
+  styleEntries.forEach((entry) => {
+    const colonIndex = entry.indexOf(":");
+    if (colonIndex > 0) {
+      const key = entry.substring(0, colonIndex).trim();
+      let value = entry.substring(colonIndex + 1).trim();
+
+      // Remove quotes if present
+      if (
+        (value.startsWith("'") && value.endsWith("'")) ||
+        (value.startsWith('"') && value.endsWith('"'))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      existingStyles[key] = value;
+    }
+  });
+
+  // Merge with new styles (new styles take precedence)
+  const mergedStyles = { ...existingStyles, ...newStyleObject };
+
+  // Convert back to string format
+  return Object.entries(mergedStyles)
+    .map(([key, value]) => `${key}: '${value}'`)
+    .join(", ");
+};
+
 // Improved AST manipulation inspired by successful open-source projects
 export const updateElementWithVisitor = (
   code: string,
@@ -71,9 +113,9 @@ export const updateElementWithVisitor = (
 
         let newOpenTag = openTag;
         if (styleMatch) {
-          // Merge with existing styles
+          // Parse existing styles and merge intelligently
           const existingStyles = styleMatch[1];
-          const mergedStyles = existingStyles + ", " + styleString;
+          const mergedStyles = mergeStyleStrings(existingStyles, styleObject);
           newOpenTag = openTag.replace(styleRegex, `style={{${mergedStyles}}}`);
         } else {
           // Add new style attribute
