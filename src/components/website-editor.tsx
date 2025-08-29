@@ -58,7 +58,7 @@ export default function WebsiteEditor() {
       }
     };
 
-    const timeoutId = setTimeout(parseCode, 300); // Debounce
+    const timeoutId = setTimeout(parseCode, 500); // Debounce
     return () => clearTimeout(timeoutId);
   }, [code]);
 

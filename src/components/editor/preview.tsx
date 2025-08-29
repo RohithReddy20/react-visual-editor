@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import * as ReactDOM from "react-dom/client";
 
 interface PreviewProps {
@@ -9,19 +9,44 @@ interface PreviewProps {
 export default function Preview({ compiledCode, error }: PreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<ReactDOM.Root | null>(null);
+  const [isUnmounting, setIsUnmounting] = useState(false);
+  const renderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const renderComponent = useCallback(() => {
-    if (!containerRef.current) return;
-
-    // Clean up previous root
-    if (rootRef.current) {
+  const cleanupRoot = useCallback(async () => {
+    if (rootRef.current && !isUnmounting) {
+      setIsUnmounting(true);
       try {
-        rootRef.current.unmount();
-        rootRef.current = null;
-      } catch (e) {
-        console.warn("Failed to unmount previous root:", e);
+        // Use setTimeout to defer unmounting to avoid race conditions
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            try {
+              if (rootRef.current) {
+                rootRef.current.unmount();
+                rootRef.current = null;
+              }
+            } catch (e) {
+              console.warn("Failed to unmount previous root:", e);
+            }
+            resolve(void 0);
+          }, 0);
+        });
+      } finally {
+        setIsUnmounting(false);
       }
     }
+  }, [isUnmounting]);
+
+  const renderComponent = useCallback(async () => {
+    if (!containerRef.current) return;
+
+    // Clear any pending renders
+    if (renderTimeoutRef.current) {
+      clearTimeout(renderTimeoutRef.current);
+      renderTimeoutRef.current = null;
+    }
+
+    // Clean up previous root safely
+    await cleanupRoot();
 
     // Clear container
     containerRef.current.innerHTML = "";
@@ -126,19 +151,35 @@ export default function Preview({ compiledCode, error }: PreviewProps) {
         `;
       }
     }
-  }, [compiledCode, error]);
+  }, [compiledCode, error, cleanupRoot]);
 
   useEffect(() => {
-    renderComponent();
+    // Debounce the render to avoid rapid updates
+    if (renderTimeoutRef.current) {
+      clearTimeout(renderTimeoutRef.current);
+    }
+
+    renderTimeoutRef.current = setTimeout(() => {
+      renderComponent();
+    }, 150); // 150ms debounce
 
     // Cleanup on unmount
     return () => {
+      if (renderTimeoutRef.current) {
+        clearTimeout(renderTimeoutRef.current);
+      }
+
+      // Async cleanup to avoid race conditions
       if (rootRef.current) {
-        try {
-          rootRef.current.unmount();
-        } catch (e) {
-          console.warn("Failed to unmount root on cleanup:", e);
-        }
+        const currentRoot = rootRef.current;
+        rootRef.current = null;
+        setTimeout(() => {
+          try {
+            currentRoot.unmount();
+          } catch (e) {
+            console.warn("Failed to unmount root on cleanup:", e);
+          }
+        }, 0);
       }
     };
   }, [renderComponent]);
