@@ -31,6 +31,7 @@ export interface ElementProperties {
   margin?: string;
   border?: string;
   borderRadius?: string;
+  hasChildElements?: boolean;
 }
 
 interface PropertiesPanelProps {
@@ -89,8 +90,8 @@ export default function PropertiesPanel({
           />
         </div>
 
-        {/* Text Content */}
-        {selectedElement.textContent !== undefined && (
+        {/* Text Content - Only show for leaf elements (no child elements) */}
+        {selectedElement.textContent !== undefined && !selectedElement.hasChildElements && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Text Content

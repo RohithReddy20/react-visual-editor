@@ -52,6 +52,11 @@ export default function EnhancedPreview({
   ): ElementProperties => {
     const computedStyle = window.getComputedStyle(element);
     const textContent = element.textContent?.trim() || "";
+    
+    // Check if element has child elements (not just text nodes)
+    const hasChildElements = Array.from(element.childNodes).some(
+      node => node.nodeType === Node.ELEMENT_NODE
+    );
 
     return {
       tag: element.tagName.toLowerCase(),
@@ -64,6 +69,7 @@ export default function EnhancedPreview({
       fontSize: computedStyle.fontSize,
       fontWeight: computedStyle.fontWeight,
       textContent: textContent || undefined,
+      hasChildElements,
       padding:
         computedStyle.padding !== "0px" ? computedStyle.padding : undefined,
       margin: computedStyle.margin !== "0px" ? computedStyle.margin : undefined,
