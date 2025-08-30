@@ -12,32 +12,33 @@ export default function SelectorButton({
   return (
     <button
       onClick={onToggle}
-      className={`
-        px-4 py-2 text-sm font-medium rounded-md border transition-all duration-200
-        ${
-          isSelecting
-            ? "bg-blue-600 text-white border-blue-600 shadow-md"
-            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-        }
-      `}
+      className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+        isSelecting
+          ? "shadow-lg hover:shadow-xl active:scale-95"
+          : "shadow-md hover:shadow-lg active:scale-95"
+      }`}
+      style={{
+        backgroundColor: isSelecting ? 'var(--accent)' : 'var(--panel-bg)',
+        border: `1px solid ${isSelecting ? 'var(--accent)' : 'var(--border)'}`,
+        color: isSelecting ? 'white' : 'var(--text-primary)'
+      }}
       title={isSelecting ? "Exit selector mode" : "Enter selector mode"}
     >
-      <div className="flex items-center space-x-2">
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M3 7l5-5 5 5" />
-          <path d="M8 2v10" />
-          <path d="M21 17l-5 5-5-5" />
-          <path d="M16 22V12" />
-        </svg>
-        <span>{isSelecting ? "Exit Selector" : "Select Element"}</span>
-      </div>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        {isSelecting ? (
+          <path d="M18 6 6 18M6 6l12 12"/>
+        ) : (
+          <path d="M9 12 7 10l-2 2 2 2 2-2Zm0 0 6-6"/>
+        )}
+      </svg>
+      <span>{isSelecting ? "Exit Selector" : "Select Element"}</span>
     </button>
   );
 }

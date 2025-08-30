@@ -339,41 +339,58 @@ export default function WebsiteEditor() {
   };
 
   return (
-    <div className="h-screen flex">
-      <div
-        className={`${
-          showPropertiesPanel ? "w-1/3" : "w-1/2"
-        } border-r border-gray-300 transition-all duration-300 relative`}
-      >
-        {/* Component Status */}
-        {isLoading ? (
-          <div className="absolute top-2 left-2 z-10 bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded">
-            Loading...
+    <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--background)' }}>
+      {/* Top Toolbar */}
+      <div className="h-14 flex items-center justify-between px-6 border-b" style={{ 
+        backgroundColor: 'var(--panel-bg)', 
+        borderColor: 'var(--border)',
+        boxShadow: 'var(--shadow-sm)'
+      }}>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--accent)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
+                <polyline points="16,18 22,12 16,6"/>
+                <polyline points="8,6 2,12 8,18"/>
+              </svg>
+            </div>
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+              React Visual Editor
+            </h1>
           </div>
-        ) : currentComponentId && (
-          <div className={`absolute top-2 left-2 z-10 px-2 py-1 text-xs rounded flex items-center gap-1 ${
-            hasPendingChanges 
-              ? 'bg-orange-100 text-orange-800' 
-              : 'bg-green-100 text-green-800'
-          }`}>
-            {hasPendingChanges && <span className="animate-pulse">●</span>}
-            ID: {currentComponentId.slice(0, 8)}...
-            {hasPendingChanges && <span className="text-[10px]">(unsaved)</span>}
-          </div>
-        )}
-        <CodeInput code={code} onChange={isLoading ? () => {} : setCode} />
-      </div>
-      <div
-        className={`${
-          showPropertiesPanel ? "w-1/3" : "w-1/2"
-        } relative transition-all duration-300`}
-      >
+          
+          {/* Component Status */}
+          {isLoading ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium" style={{ 
+              backgroundColor: 'var(--panel-header)', 
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)'
+            }}>
+              <div className="w-3 h-3 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin"></div>
+              Loading component...
+            </div>
+          ) : currentComponentId && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full transition-all ${
+              hasPendingChanges 
+                ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                hasPendingChanges 
+                  ? 'bg-amber-400 animate-pulse' 
+                  : 'bg-emerald-400'
+              }`}></div>
+              <span className="font-mono">ID: {currentComponentId.slice(0, 8)}...</span>
+              {hasPendingChanges && <span className="opacity-75">(unsaved)</span>}
+            </div>
+          )}
+        </div>
+
         {/* Action Buttons */}
-        <div className="absolute top-2 right-2 z-10 flex gap-2">
+        <div className="flex items-center gap-3">
           {currentComponentId && (
             <button
               onClick={async () => {
-                // Clear pending timeouts and save immediately
                 if (autoSaveTimeoutRef.current) {
                   clearTimeout(autoSaveTimeoutRef.current);
                 }
@@ -384,37 +401,80 @@ export default function WebsiteEditor() {
                 await saveComponent();
               }}
               disabled={isAutoSaving}
-              className={`px-3 py-1 text-sm rounded ${
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                 isAutoSaving 
-                  ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                   : hasPendingChanges
-                    ? 'bg-orange-500 text-white hover:bg-orange-600'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-              } transition-colors`}
+                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-md hover:shadow-lg active:scale-95'
+                    : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-md hover:shadow-lg active:scale-95'
+              }`}
             >
-              {isAutoSaving 
-                ? 'Saving...' 
-                : hasPendingChanges 
-                  ? 'Save Changes (⌘S)' 
-                  : 'Saved (⌘S)'}
+              {isAutoSaving ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Saving...
+                </>
+              ) : hasPendingChanges ? (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17,21 17,13 7,13 7,21"/>
+                    <polyline points="7,3 7,8 15,8"/>
+                  </svg>
+                  Save Changes
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                  Saved
+                </>
+              )}
             </button>
           )}
           <SelectorButton isSelecting={isSelecting} onToggle={toggleSelector} />
         </div>
-        <EnhancedPreview
-          compiledCode={compiledCode}
-          error={error}
-          isSelecting={isSelecting}
-          onElementSelect={handleElementSelect}
-        />
       </div>
-      {showPropertiesPanel && (
-        <PropertiesPanel
-          selectedElement={selectedElement}
-          onPropertyChange={handlePropertyChange}
-          onClose={handleClosePropertiesPanel}
-        />
-      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex">
+        {/* Code Editor */}
+        <div
+          className={`${
+            showPropertiesPanel ? "w-2/5" : "w-1/2"
+          } transition-all duration-300 ease-out`}
+          style={{ borderRight: '1px solid var(--border)' }}
+        >
+          <CodeInput code={code} onChange={isLoading ? () => {} : setCode} />
+        </div>
+        
+        {/* Preview Area */}
+        <div
+          className={`${
+            showPropertiesPanel ? "w-2/5" : "w-1/2"
+          } transition-all duration-300 ease-out`}
+          style={{ borderRight: showPropertiesPanel ? '1px solid var(--border)' : 'none' }}
+        >
+          <EnhancedPreview
+            compiledCode={compiledCode}
+            error={error}
+            isSelecting={isSelecting}
+            onElementSelect={handleElementSelect}
+          />
+        </div>
+        
+        {/* Properties Panel */}
+        {showPropertiesPanel && (
+          <div className="w-1/5 min-w-80 h-full">
+            <PropertiesPanel
+              selectedElement={selectedElement}
+              onPropertyChange={handlePropertyChange}
+              onClose={handleClosePropertiesPanel}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

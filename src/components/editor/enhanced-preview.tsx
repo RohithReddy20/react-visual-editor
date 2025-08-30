@@ -181,8 +181,19 @@ export default function EnhancedPreview({
 
     if (error) {
       containerRef.current.innerHTML = `
-        <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 6px; font-family: monospace; white-space: pre-wrap;">
-          Compilation Error:\n${error}
+        <div style="
+          color: var(--error); 
+          background: #fef2f2; 
+          border: 1px solid #fecaca; 
+          padding: 16px; 
+          border-radius: var(--radius); 
+          font-family: var(--font-mono); 
+          font-size: 13px;
+          line-height: 1.5;
+          white-space: pre-wrap;
+          box-shadow: var(--shadow-sm);
+        ">
+          <div style="font-weight: 600; margin-bottom: 8px; color: #dc2626;">⚠ Compilation Error</div>${error}
         </div>
       `;
       return;
@@ -190,8 +201,23 @@ export default function EnhancedPreview({
 
     if (!compiledCode) {
       containerRef.current.innerHTML = `
-        <div style="color: #6b7280; font-style: italic; padding: 20px; text-align: center;">
-          No component to preview
+        <div style="
+          color: var(--text-muted); 
+          font-style: italic; 
+          padding: 32px; 
+          text-align: center;
+          font-size: 14px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        ">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity: 0.5;">
+            <polyline points="16,18 22,12 16,6"/>
+            <polyline points="8,6 2,12 8,18"/>
+          </svg>
+          <div>No component to preview</div>
+          <div style="font-size: 12px; opacity: 0.7;">Paste your React component code to get started</div>
         </div>
       `;
       return;
@@ -253,8 +279,18 @@ export default function EnhancedPreview({
 
       if (!ComponentToRender || typeof ComponentToRender !== "function") {
         containerRef.current.innerHTML = `
-          <div style="color: #ef4444; padding: 20px;">
-            No valid React component found. Make sure your component is named MyComponent, Component, App, or starts with a capital letter.
+          <div style="
+            color: var(--warning); 
+            background: #fffbeb; 
+            border: 1px solid #fed7aa; 
+            padding: 16px; 
+            border-radius: var(--radius);
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: var(--shadow-sm);
+          ">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #d97706;">⚠ Component Not Found</div>
+            Make sure your component is named MyComponent, Component, App, or starts with a capital letter.
           </div>
         `;
         return;
@@ -268,8 +304,19 @@ export default function EnhancedPreview({
 
       if (containerRef.current) {
         containerRef.current.innerHTML = `
-          <div style="color: #ef4444; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 6px; font-family: monospace; white-space: pre-wrap;">
-            Runtime Error: ${errorMessage}
+          <div style="
+            color: var(--error); 
+            background: #fef2f2; 
+            border: 1px solid #fecaca; 
+            padding: 16px; 
+            border-radius: var(--radius); 
+            font-family: var(--font-mono); 
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            box-shadow: var(--shadow-sm);
+          ">
+            <div style="font-weight: 600; margin-bottom: 8px; color: #dc2626;">⚠ Runtime Error</div>${errorMessage}
           </div>
         `;
       }
@@ -305,18 +352,40 @@ export default function EnhancedPreview({
   }, [renderComponent]);
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="bg-gray-800 text-white px-4 py-2 text-sm font-medium">
-        Live Preview{" "}
-        {isSelecting && <span className="text-blue-300">(Selector Mode)</span>}
+    <div className="h-full flex flex-col" style={{ backgroundColor: 'var(--panel-bg)' }}>
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ 
+        backgroundColor: 'var(--panel-header)', 
+        borderColor: 'var(--border)' 
+      }}>
+        <div className="flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12,6 12,12 16,14"/>
+          </svg>
+          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            Live Preview
+          </span>
+        </div>
+        {isSelecting && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full" style={{ 
+            backgroundColor: 'var(--accent)', 
+            color: 'white' 
+          }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 7l5-5 5 5"/>
+              <path d="M8 2v10"/>
+            </svg>
+            Selecting
+          </span>
+        )}
       </div>
-      <div className="flex-1 bg-white overflow-auto relative">
+      <div className="flex-1 overflow-auto relative" style={{ backgroundColor: '#ffffff' }}>
         <div className="p-4 relative">
           <div
             ref={containerRef}
             style={{
               width: "100%",
-              minHeight: "100%",
+              minHeight: "calc(100vh - 180px)",
               cursor: isSelecting ? "crosshair" : "default",
             }}
           />
@@ -326,13 +395,14 @@ export default function EnhancedPreview({
             style={{
               position: "absolute",
               pointerEvents: "none",
-              border: "2px solid #3b82f6",
+              border: "2px solid var(--accent)",
               backgroundColor: "rgba(59, 130, 246, 0.1)",
-              borderRadius: "2px",
+              borderRadius: "4px",
               display: "none",
               zIndex: 1000,
-              top: "16px", // Account for padding
-              left: "16px", // Account for padding
+              top: "16px",
+              left: "16px",
+              boxShadow: "0 4px 12px rgba(59, 130, 246, 0.15)"
             }}
           />
         </div>
