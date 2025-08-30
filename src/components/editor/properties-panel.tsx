@@ -1,5 +1,25 @@
 import React from "react";
 
+// Utility function to convert RGB/RGBA to hex
+const rgbToHex = (rgb: string): string => {
+  if (!rgb || rgb === 'transparent') return '#000000';
+  
+  // Handle hex values that are already in the right format
+  if (rgb.startsWith('#')) return rgb;
+  
+  // Extract RGB values from rgb() or rgba() format
+  const rgbMatch = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+  if (!rgbMatch) return '#000000';
+  
+  const [, r, g, b] = rgbMatch;
+  const toHex = (n: string) => {
+    const hex = parseInt(n, 10).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
 export interface ElementProperties {
   tag: string;
   color?: string;
@@ -92,7 +112,7 @@ export default function PropertiesPanel({
           <div className="flex space-x-2">
             <input
               type="color"
-              value={selectedElement.color || "#000000"}
+              value={rgbToHex(selectedElement.color || "#000000")}
               onChange={(e) => handleInputChange("color", e.target.value)}
               className="w-12 h-10 border border-gray-300 rounded-md"
             />
@@ -114,7 +134,7 @@ export default function PropertiesPanel({
           <div className="flex space-x-2">
             <input
               type="color"
-              value={selectedElement.backgroundColor || "#ffffff"}
+              value={rgbToHex(selectedElement.backgroundColor || "#ffffff")}
               onChange={(e) =>
                 handleInputChange("backgroundColor", e.target.value)
               }

@@ -55,12 +55,10 @@ export default function EnhancedPreview({
 
     return {
       tag: element.tagName.toLowerCase(),
-      color:
-        computedStyle.color !== "rgba(0, 0, 0, 0)"
-          ? computedStyle.color
-          : undefined,
-      backgroundColor:
-        computedStyle.backgroundColor !== "rgba(0, 0, 0, 0)"
+      color: computedStyle.color || undefined,
+      backgroundColor: 
+        computedStyle.backgroundColor !== "rgba(0, 0, 0, 0)" && 
+        computedStyle.backgroundColor !== "transparent"
           ? computedStyle.backgroundColor
           : undefined,
       fontSize: computedStyle.fontSize,
