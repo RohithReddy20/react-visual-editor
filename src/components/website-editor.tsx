@@ -87,7 +87,7 @@ export default function WebsiteEditor() {
 
   // Auto-save when component is first created (on paste)
   const createComponent = useCallback(async (code: string) => {
-    if (!code.trim() || code === defaultCode) return;
+    if (!code.trim()) return;
     
     try {
       setIsAutoSaving(true);
@@ -160,8 +160,8 @@ export default function WebsiteEditor() {
       clearTimeout(codeChangeTimeoutRef.current);
     }
 
-    // If code is default or empty, don't process
-    if (code === defaultCode || !code.trim()) {
+    // Always auto-save, even for default code
+    if (!code.trim()) {
       return;
     }
 
@@ -172,13 +172,13 @@ export default function WebsiteEditor() {
       codeChangeTimeoutRef.current = setTimeout(async () => {
         await createComponent(code);
         setHasPendingChanges(false);
-      }, 2000); // 2 second debounce for creation
+      }, 1000); // Reduced debounce for faster saving
     } else {
       // If component exists, auto-save changes
       codeChangeTimeoutRef.current = setTimeout(async () => {
         await saveComponent();
         setHasPendingChanges(false);
-      }, 2000); // 2 second debounce for updates
+      }, 1000); // Reduced debounce for faster saving
     }
   }, [code, currentComponentId, createComponent, saveComponent]);
 
